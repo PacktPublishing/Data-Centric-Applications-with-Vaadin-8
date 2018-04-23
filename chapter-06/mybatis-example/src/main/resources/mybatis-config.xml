@@ -27,6 +27,6 @@
         </environment>
     </environments>
     <mappers>
-        <mapper class="packt.vaadin.chapter06.mybatis.MessageMapper"/>
+        <mapper class="packt.vaadin.datacentric.chapter06.mybatis.MessageMapper"/>
     </mappers>
 </configuration>
