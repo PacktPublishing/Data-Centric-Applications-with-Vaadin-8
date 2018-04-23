@@ -21,7 +21,7 @@ public class PublicComponent extends Composite {
     }
 
     private void loginClicked(LoginFormComponent form) {
-        if (!AuthService.authenticate(form.getUsername(), form.getPassword(), form.isRememberMe())) {
+        if (!AuthService.authenticate(form.getUsername(), form.getPassword())) {
             Notification.show(Messages.get("auth.bad.credentials"), Notification.Type.ERROR_MESSAGE);
         }
     }
