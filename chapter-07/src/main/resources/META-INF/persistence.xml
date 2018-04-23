@@ -1,0 +1,25 @@
+<persistence xmlns="http://java.sun.com/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
+             version="2.0">
+    <persistence-unit name="chapter-07-pu">
+        <properties>
+            <property name="javax.persistence.jdbc.url" value="jdbc:h2:mem:demo" />
+            <property name="javax.persistence.jdbc.user" value="sa" />
+            <property name="javax.persistence.jdbc.password" value="" />
+            <property name="javax.persistence.schema-generation.database.action" value="create" />
+
+            <!-- MySQL:
+            <property name="javax.persistence.jdbc.url" value="url=jdbc:mysql://localhost/demo" />
+            <property name="javax.persistence.jdbc.user" value="root" />
+            <property name="javax.persistence.jdbc.password" value="password" />
+            -->
+
+            <!-- PostgreSQL:
+            <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/demo" />
+            <property name="javax.persistence.jdbc.user" value="postgres" />
+            <property name="javax.persistence.jdbc.password" value="password" />
+            -->
+        </properties>
+    </persistence-unit>
+</persistence>

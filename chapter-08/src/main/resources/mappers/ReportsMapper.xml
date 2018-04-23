@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="packt.vaadin.datacentric.chapter08.reports.ReportsMapper">
+
+    <select id="findCallsBefore" resultType="packt.vaadin.datacentric.chapter08.reports.CallDto">
+        SELECT
+          city,
+          client,
+          phoneNumber,
+          startTime,
+          duration,
+          status
+        FROM Call
+        WHERE startTime >= #{time}
+        ORDER BY startTime DESC
+    </select>
+
+    <select id="countCallsBetween" resultType="packt.vaadin.datacentric.chapter08.reports.CapacityDto">
+        <![CDATA[
+        SELECT
+          MONTH(startTime) AS monthNumber,
+          MONTHNAME(startTime) AS monthName,
+          COUNT(id) AS calls
+        FROM Call
+        WHERE
+          startTime >= #{start}
+          AND startTime <= #{end}
+        GROUP BY monthNumber, monthName
+        ORDER BY monthNumber
+        ]]>
+    </select>
+
+    <select id="countCallsByClientBetween" resultType="packt.vaadin.datacentric.chapter08.reports.ClientCountDto">
+        <![CDATA[
+        SELECT
+          client,
+          city,
+          phoneNumber,
+          COUNT(id) AS calls
+        FROM Call
+        WHERE
+          startTime >= #{start}
+          AND startTime <= #{end}
+        GROUP BY client, city, phoneNumber
+        ORDER BY city
+        ]]>
+    </select>
+
+</mapper>

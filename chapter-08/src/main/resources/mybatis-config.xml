@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration PUBLIC "-//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="org.h2.Driver"/>
+                <property name="url" value="jdbc:h2:file:~/h2-databases/chapter-08;AUTO_SERVER=TRUE;DB_CLOSE_ON_EXIT=FALSE"/>
+                <property name="username" value="sa"/>
+                <property name="password" value=""/>
+
+                <!-- MySQL
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost/chapter-08"/>
+                <property name="username" value="root"/>
+                <property name="password" value="password"/>
+                -->
+
+                <!-- PostgreSQL
+                <property name="driver" value="org.postgresql.Driver"/>
+                <property name="url" value="jdbc:postgresql://localhost:5432/chapter-08"/>
+                <property name="username" value="postgres"/>
+                <property name="password" value="password"/>
+                -->
+            </dataSource>
+        </environment>
+    </environments>
+    <mappers>
+        <mapper resource="mappers/ReportsMapper.xml"/>
+    </mappers>
+</configuration>
