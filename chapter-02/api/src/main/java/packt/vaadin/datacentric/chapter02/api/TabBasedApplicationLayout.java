@@ -1,72 +1,73 @@
 package packt.vaadin.datacentric.chapter02.api;
 
-import com.vaadin.server.SerializableConsumer;
-import com.vaadin.shared.ui.MarginInfo;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.VerticalLayout;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.HasStyle;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.H1;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.splitlayout.SplitLayout;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.function.SerializableConsumer;
+import org.vaadin.tabs.PagedTabs;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * @author Alejandro Duarte
  */
-public class TabBasedApplicationLayout extends Composite implements ApplicationLayout {
+public class TabBasedApplicationLayout extends Composite<VerticalLayout> implements ApplicationLayout {
 
-    private VerticalLayout mainLayout = new VerticalLayout();
+    private VerticalLayout mainLayout = getContent();
     private HorizontalLayout header = new HorizontalLayout();
-    private HorizontalSplitPanel splitPanel = new HorizontalSplitPanel();
+    private SplitLayout splitLayout = new SplitLayout();
     private VerticalLayout menuLayout = new VerticalLayout();
-    private TabSheet tabSheet = new TabSheet();
+    private PagedTabs tabs = new PagedTabs();
 
-    private Collection<WorkingAreaComponent> workingAreaComponents = new HashSet<>();
+    private HashMap<String, WorkingAreaComponent> workingAreaComponents = new HashMap<>();
     private Collection<String> menuButtonStyles = new HashSet<>();
 
     public TabBasedApplicationLayout(String caption) {
-        Label captionLabel = new Label(caption);
-        captionLabel.setStyleName("h1");
+        H1 captionComponent = new H1(caption);
 
-        header.addComponent(captionLabel);
-        header.setComponentAlignment(captionLabel, Alignment.MIDDLE_LEFT);
-        header.setExpandRatio(captionLabel, 1);
-        header.setMargin(new MarginInfo(false, true));
+        header.add(captionComponent);
+        header.setAlignSelf(FlexComponent.Alignment.START, captionComponent);
+        header.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
         header.setWidth("100%");
 
-        tabSheet.setSizeFull();
-        tabSheet.setCloseHandler((tabsheet, tabContent) -> closeTab(tabContent));
+        tabs.setSizeFull();
 
-        splitPanel.setFirstComponent(menuLayout);
-        splitPanel.setSecondComponent(tabSheet);
-        splitPanel.setSizeFull();
-        splitPanel.setSplitPosition(20, Unit.PERCENTAGE);
+        splitLayout.addToPrimary(menuLayout);
+        splitLayout.addToSecondary(tabs);
+        splitLayout.setSizeFull();
+        menuLayout.setWidth("20%");
 
         mainLayout.setMargin(false);
         mainLayout.setSpacing(false);
-        mainLayout.addComponent(header);
-        mainLayout.addComponent(splitPanel);
-        mainLayout.setExpandRatio(splitPanel, 1);
+        mainLayout.add(header, splitLayout);
+        mainLayout.expand(splitLayout);
         mainLayout.setSizeFull();
 
-        setCompositionRoot(mainLayout);
-        setSizeFull();
+        getContent().setSizeFull();
+        getContent().setMargin(false);
+        getContent().setPadding(false);
     }
 
     @Override
     public void addHeaderComponent(Component component) {
-        component.setWidth(null);
-        header.addComponent(component);
-        header.setComponentAlignment(component, Alignment.MIDDLE_RIGHT);
+        component.getElement().getStyle().set("width", null);
+        header.add(component);
+        header.setAlignSelf(FlexComponent.Alignment.END, component);
+        header.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER);
     }
 
     @Override
@@ -75,11 +76,10 @@ public class TabBasedApplicationLayout extends Composite implements ApplicationL
     }
 
     public void addWorkingAreaComponent(WorkingAreaComponent component, boolean closable) {
-        if (!workingAreaComponents.contains(component)) {
-            TabSheet.Tab tab = tabSheet.addTab(component.getComponent(), component.getCaption());
-            tab.setClosable(closable);
-            tabSheet.setSelectedTab(tab);
-            workingAreaComponents.add(component);
+        if (!workingAreaComponents.values().contains(component)) {
+            Tab tab = tabs.add(component.getComponent(), component.getCaption(), closable);
+            tabs.select(tab);
+            workingAreaComponents.put(component.getCaption(), component);
         } else {
             showComponent(component.getCaption());
         }
@@ -87,62 +87,58 @@ public class TabBasedApplicationLayout extends Composite implements ApplicationL
 
     @Override
     public Collection<Component> getHeaderComponents() {
-        return IntStream.range(0, header.getComponentCount())
-                .mapToObj(header::getComponent)
-                .collect(Collectors.toList());
+        return header.getChildren().collect(Collectors.toList());
     }
 
     @Override
     public Collection<WorkingAreaComponent> getWorkingAreaComponents() {
-        return workingAreaComponents;
+        return workingAreaComponents.values();
     }
 
     @Override
     public void addMenuOption(MenuOption menuOption, SerializableConsumer<MenuOption> clickListener) {
         Button button = new Button(menuOption.getCaption(), event -> clickListener.accept(menuOption));
-        menuButtonStyles.forEach(button::addStyleName);
-        menuLayout.addComponent(button);
+        button.setWidth("100%");
+        menuButtonStyles.forEach(button::addClassName);
+        menuLayout.add(button);
     }
 
     public void closeTab(Component tabContent) {
-        List<WorkingAreaComponent> toRemove = workingAreaComponents.stream()
+        List<WorkingAreaComponent> toRemove = workingAreaComponents.values().stream()
                 .filter(component -> component.getComponent().equals(tabContent))
                 .collect(Collectors.toList());
 
-        workingAreaComponents.removeAll(toRemove);
-        tabSheet.removeTab(tabSheet.getTab(tabContent));
+        workingAreaComponents.remove(toRemove.get(0));
+        tabs.remove(tabs.getTab(tabContent));
     }
 
     public void showComponent(String caption) {
-        IntStream.range(0, tabSheet.getComponentCount())
-                .mapToObj(tabSheet::getTab)
-                .filter(tab -> tab.getCaption().equals(caption))
-                .forEach(tabSheet::setSelectedTab);
+        WorkingAreaComponent workingAreaComponent = workingAreaComponents.get(caption);
+        tabs.select(workingAreaComponent.getComponent());
     }
 
     public void setHeaderStyleName(String styleName) {
-        header.setStyleName(styleName);
+        header.setClassName(styleName);
     }
 
     public void addHeaderStyleName(String styleName) {
-        header.addStyleName(styleName);
+        header.addClassName(styleName);
     }
 
     public void setMenuButtonsStyleName(String styleName) {
         menuButtonStyles.clear();
         menuButtonStyles.add(styleName);
-        updateMenuButtonsStyle(styleName, Component::setStyleName);
+        updateMenuButtonsStyle(styleName, HasStyle::setClassName);
     }
 
     public void addMenuButtonsStyleName(String styleName) {
         menuButtonStyles.add(styleName);
-        updateMenuButtonsStyle(styleName, Component::addStyleName);
+        updateMenuButtonsStyle(styleName, HasStyle::addClassName);
     }
 
-    private void updateMenuButtonsStyle(String styleName, BiConsumer<Component, String> setOrAddStyleMethod) {
-        IntStream.range(0, menuLayout.getComponentCount())
-                .mapToObj(menuLayout::getComponent)
-                .forEach(component -> setOrAddStyleMethod.accept(component, styleName));
+    private void updateMenuButtonsStyle(String styleName, BiConsumer<HasStyle, String> setOrAddStyleMethod) {
+        menuLayout.getChildren()
+                .forEach(component -> setOrAddStyleMethod.accept((HasStyle) component, styleName));
     }
 
 }

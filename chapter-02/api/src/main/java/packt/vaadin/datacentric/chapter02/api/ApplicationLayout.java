@@ -1,7 +1,8 @@
 package packt.vaadin.datacentric.chapter02.api;
 
-import com.vaadin.server.SerializableConsumer;
-import com.vaadin.ui.Component;
+
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.function.SerializableConsumer;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.Collection;
 /**
  * @author Alejandro Duarte
  */
-public interface ApplicationLayout extends Component {
+public interface ApplicationLayout {
 
     /**
      * @author Alejandro Duarte

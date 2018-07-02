@@ -1,8 +1,8 @@
 package packt.vaadin.datacentric.chapter09.ui;
 
-import com.vaadin.data.provider.Query;
-import com.vaadin.data.provider.QuerySortOrder;
-import com.vaadin.shared.data.sort.SortDirection;
+import com.vaadin.flow.data.provider.Query;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

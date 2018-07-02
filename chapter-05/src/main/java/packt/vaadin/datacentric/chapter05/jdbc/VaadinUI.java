@@ -1,29 +1,27 @@
 package packt.vaadin.datacentric.chapter05.jdbc;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 import java.sql.SQLException;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
-    @Override
-    protected void init(VaadinRequest request) {
+    public VaadinUI() {
         try {
-            VerticalLayout layout = new VerticalLayout();
-            setContent(layout);
             DatabaseService.findAllMessages().forEach(
-                    m -> layout.addComponent(new Label(m))
+                    m -> getContent().add(new Span(m))
             );
 
         } catch (SQLException e) {
-            Notification.show("Database error. See server log.", Notification.Type.ERROR_MESSAGE);
+            Notification.show("Database error. See the server's log.");
             e.printStackTrace();
         }
     }

@@ -1,50 +1,51 @@
 package packt.vaadin.datacentric.chapter09.ui;
 
-import com.vaadin.data.provider.DataProvider;
-import com.vaadin.event.ShortcutAction;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.DataProvider;
 import packt.vaadin.datacentric.chapter09.domain.Call;
 import packt.vaadin.datacentric.chapter09.domain.CallRepository;
 
 /**
  * @author Alejandro Duarte
  */
-public class CallsBrowser extends Composite {
+public class CallsBrowser extends Composite<VerticalLayout> {
 
     public CallsBrowser() {
         TextField filter = new TextField();
         filter.setPlaceholder("Client / Phone / City");
         filter.focus();
 
-        Button search = new Button(VaadinIcons.SEARCH);
-        search.setClickShortcut(ShortcutAction.KeyCode.ENTER);
+        Button search = new Button(VaadinIcon.SEARCH.create());
+        Button clear = new Button(VaadinIcon.CLOSE_SMALL.create());
 
-        Button clear = new Button(VaadinIcons.CLOSE_SMALL);
+        filter.addKeyPressListener(Key.ENTER, e -> search.click());
 
-        CssLayout filterLayout = new CssLayout(filter, search, clear);
-        filterLayout.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+        HorizontalLayout filterLayout = new HorizontalLayout(filter, search, clear);
+        filterLayout.setMargin(false);
+        filterLayout.setPadding(false);
 
-        Label countLabel = new Label();
-        countLabel.addStyleNames(ValoTheme.LABEL_LIGHT, ValoTheme.LABEL_SMALL);
+        Span countLabel = new Span();
+        countLabel.getElement().setAttribute("theme", "font-size-s");
 
         HorizontalLayout headerLayout = new HorizontalLayout(filterLayout, countLabel);
-        headerLayout.setComponentAlignment(countLabel, Alignment.MIDDLE_LEFT);
+        headerLayout.setMargin(false);
+        headerLayout.setPadding(false);
+        headerLayout.setVerticalComponentAlignment(FlexComponent.Alignment.CENTER, countLabel);
 
         DataProvider<Call, Void> dataProvider = DataProvider.fromFilteringCallbacks(
                 query -> CallRepository.find(query.getOffset(), query.getLimit(), filter.getValue(), DataUtils.getOrderMap(query)).stream(),
                 query -> {
                     int count = CallRepository.count(filter.getValue());
-                    countLabel.setValue(count + " calls found");
+                    countLabel.setText(count + " calls found");
                     return count;
                 }
         );
@@ -62,10 +63,9 @@ public class CallsBrowser extends Composite {
             dataProvider.refreshAll();
         });
 
-        VerticalLayout mainLayout = new VerticalLayout(headerLayout);
-        mainLayout.setMargin(false);
-        mainLayout.addComponentsAndExpand(grid);
-        setCompositionRoot(mainLayout);
+        getContent().add(headerLayout, grid);
+        getContent().expand(grid);
+        getContent().setMargin(false);
     }
 
 }

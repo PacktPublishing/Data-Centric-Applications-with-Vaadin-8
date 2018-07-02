@@ -1,19 +1,19 @@
 package packt.vaadin.datacentric.chapter04;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 /**
  * @author Alejandro Duarte
  */
-public class PrivateComponent extends Composite {
+public class PrivateComponent extends Composite<VerticalLayout> {
 
     public PrivateComponent() {
-        Label label = new Label("User: " + AuthService.getAuthenticatedUsername());
+        Span span = new Span("User: " + AuthService.getAuthenticatedUsername());
         Button logOutButton = new Button(Messages.get("auth.logout"), e -> logoutClicked());
-        setCompositionRoot(new VerticalLayout(label, logOutButton));
+        getContent().add(span, logOutButton);
     }
 
     private void logoutClicked() {

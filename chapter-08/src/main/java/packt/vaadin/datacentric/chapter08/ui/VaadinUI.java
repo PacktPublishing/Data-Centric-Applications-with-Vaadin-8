@@ -1,19 +1,23 @@
 package packt.vaadin.datacentric.chapter08.ui;
 
-import com.vaadin.annotations.Push;
-import com.vaadin.annotations.Title;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.server.FileDownloader;
-import com.vaadin.server.StreamResource;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.MenuBar;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.Panel;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.Push;
+import com.vaadin.flow.data.renderer.IconRenderer;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.server.StreamResource;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,64 +26,104 @@ import java.io.ByteArrayOutputStream;
  * @author Alejandro Duarte
  */
 @Push
-@Title("Report Viewer")
-public class VaadinUI extends UI {
+@PageTitle("Report Viewer")
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
     private HorizontalLayout header = new HorizontalLayout();
-    private Panel panel = new Panel();
-    private MenuBar.MenuItem annualLegalReportItem;
+    private VerticalLayout panel = new VerticalLayout();
     private AnnualLegalReport annualLegalReport;
+    private boolean generatingAnnualReport;
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        MenuBar menuBar = new MenuBar();
-        menuBar.addStyleName(ValoTheme.MENUBAR_BORDERLESS);
-        MenuBar.MenuItem reportsMenuItem = menuBar.addItem("Reports", VaadinIcons.FILE_TABLE, null);
-        reportsMenuItem.addItem("Worldwide Calls in the Last Hour", VaadinIcons.PHONE_LANDLINE,
-                i -> showLastHourCallReport());
-        reportsMenuItem.addItem("Monthly Capacity Report", VaadinIcons.BAR_CHART_H,
-                i -> showMonthlyCapacityReport());
-        annualLegalReportItem = reportsMenuItem.addItem("Annual Legal Report", VaadinIcons.FILE_TEXT_O,
-                i -> generateAnnualLegalReport());
+    @Data
+    @AllArgsConstructor
+    private class ReportItem {
+        private String name;
+        private Runnable reportGenerator;
+        private Icon icon;
+    }
 
-        header.addComponents(menuBar);
+    public VaadinUI() {
+        // No suitable menu component is available in Vaadin 10.0.1
 
-        panel.addStyleName(ValoTheme.PANEL_WELL);
+        ComboBox<ReportItem> menu = new ComboBox<>();
+        menu.setPlaceholder("Reports");
+        menu.setWidth("400px");
+        menu.setRenderer(new IconRenderer<>(i -> i.getIcon(), ReportItem::getName));
+        menu.setItemLabelGenerator(ReportItem::getName);
+        menu.setItems(new ReportItem("Worldwide Calls in the Last Hour", this::showLastHourCallReport, VaadinIcon.PHONE_LANDLINE.create()),
+                new ReportItem("Monthly Capacity Report", this::showMonthlyCapacityReport, VaadinIcon.BAR_CHART_H.create()),
+                new ReportItem("Annual Legal Report", this::generateAnnualLegalReport, VaadinIcon.FILE_TEXT_O.create()));
+        menu.addValueChangeListener(e -> {
+            ReportItem item = e.getValue();
+            if (item != null) {
+                item.getReportGenerator().run();
+                menu.clear();
+            }
+        });
 
-        VerticalLayout mainLayout = new VerticalLayout(header);
-        mainLayout.addComponentsAndExpand(panel);
-        setContent(mainLayout);
+        header.setWidth("100%");
+        header.add(menu);
+        header.setMargin(false);
+        header.setPadding(false);
+
+        panel.setMargin(false);
+        panel.setPadding(false);
+
+        getContent().add(header, panel);
+        getContent().expand(panel);
     }
 
     private void showLastHourCallReport() {
-        panel.setContent(new VerticalLayout(new LastHourCallReport()));
+        panel.removeAll();
+        panel.add(new LastHourCallReport());
     }
 
     private void showMonthlyCapacityReport() {
-        panel.setContent(new VerticalLayout(new MonthlyCapacityReport()));
+        panel.removeAll();
+        panel.add(new MonthlyCapacityReport());
     }
 
     private void generateAnnualLegalReport() {
-        Notification.show("Report generation started",
-                "You'll be notified once the report is ready.", Notification.Type.TRAY_NOTIFICATION);
-        annualLegalReportItem.setEnabled(false);
+        if (generatingAnnualReport) {
+            Notification.show("The report was already requested or is ready for download");
+            return;
+        }
+        generatingAnnualReport = true;
+
+        Notification notification = new Notification(
+                new H2("Report generation started"),
+                new Span("You'll be notified once the report is ready."));
+
+        notification.setPosition(Notification.Position.MIDDLE);
+        notification.setDuration(5000);
+        notification.open();
+
+        UI ui = UI.getCurrent();
 
         new Thread(() -> {
             annualLegalReport = new AnnualLegalReport();
             ByteArrayOutputStream outputStream = annualLegalReport.getOutputStream();
-            ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
-            access(() -> {
-                Button button = new Button("Download Annual Legal Report", VaadinIcons.DOWNLOAD_ALT);
-                header.addComponent(button);
+            byte[] buf = outputStream.toByteArray();
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(buf);
 
-                FileDownloader downloader = new FileDownloader(new StreamResource(() -> {
-                    header.removeComponent(button);
-                    annualLegalReportItem.setEnabled(true);
+            Span downloadLink = new Span();
+
+            ui.access(() -> {
+                StreamResource streamResource = new StreamResource("annual-legal-report.pdf", () -> {
+                    header.remove(downloadLink);
+                    generatingAnnualReport = false;
                     return inputStream;
-                }, "annual-legal-report.pdf"));
-                downloader.extend(button);
+                });
+                Anchor anchor = new Anchor(streamResource, "Download Annual Legal Report");
+                anchor.getElement().setAttribute("download", true);
 
-                Notification.show("Report ready for download", Notification.Type.TRAY_NOTIFICATION);
+                Icon icon = VaadinIcon.DOWNLOAD_ALT.create();
+
+                downloadLink.add(icon, anchor);
+                header.add(downloadLink);
+
+                Notification.show("Report ready for download");
             });
         }).start();
     }

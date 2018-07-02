@@ -1,8 +1,8 @@
 package packt.vaadin.datacentric.chapter04;
 
-import com.vaadin.server.Page;
-import com.vaadin.server.VaadinService;
-import com.vaadin.server.VaadinSession;
+import com.vaadin.flow.component.UI;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
 
 import javax.servlet.http.Cookie;
 import java.math.BigInteger;
@@ -32,7 +32,8 @@ public class AuthService {
                 rememberUser(username);
             }
             VaadinSession.getCurrent().setAttribute(USERNAME_ATTRIBUTE, username);
-            Page.getCurrent().reload();
+            UI.getCurrent().navigate("");
+            UI.getCurrent().getPage().executeJavaScript("location.reload();");
         }
 
         return authentic;
@@ -62,7 +63,8 @@ public class AuthService {
     public static void logout() {
         removeRememberedUser();
         VaadinService.getCurrentRequest().getWrappedSession().invalidate();
-        Page.getCurrent().setLocation("");
+        UI.getCurrent().navigate("");
+        UI.getCurrent().getPage().executeJavaScript("location.reload();");
     }
 
     private static void removeRememberedUser() {
@@ -89,6 +91,11 @@ public class AuthService {
 
     private static Optional<Cookie> getCookie() {
         Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
+
+        if (cookies == null) {
+            return Optional.empty();
+        }
+
         return Arrays.stream(cookies)
                 .filter(c -> COOKIE_NAME.equals(c.getName()))
                 .findFirst();

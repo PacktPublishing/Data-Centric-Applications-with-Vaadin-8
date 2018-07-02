@@ -1,6 +1,6 @@
 package packt.vaadin.datacentric.chapter04;
 
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.UI;
 
 import java.io.File;
 import java.io.IOException;

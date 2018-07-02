@@ -1,6 +1,6 @@
 package packt.vaadin.datacentric.chapter02.example.module;
 
-import com.vaadin.ui.Notification;
+import com.vaadin.flow.component.notification.Notification;
 import packt.vaadin.datacentric.chapter02.api.AppModule;
 import packt.vaadin.datacentric.chapter02.api.ApplicationLayout;
 
@@ -16,7 +16,7 @@ public class ExampleModule implements AppModule {
     }
 
     private void optionClicked(ApplicationLayout.MenuOption menuOption) {
-        Notification.show("It works!", Notification.Type.TRAY_NOTIFICATION);
+        Notification.show("It works!");
     }
 
 }

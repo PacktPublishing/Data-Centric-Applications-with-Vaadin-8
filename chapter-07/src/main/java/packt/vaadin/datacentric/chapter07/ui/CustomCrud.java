@@ -1,25 +1,24 @@
 package packt.vaadin.datacentric.chapter07.ui;
 
-import com.vaadin.data.BeanValidationBinder;
-import com.vaadin.data.ValidationException;
-import com.vaadin.icons.VaadinIcons;
-import com.vaadin.ui.Alignment;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.CheckBoxGroup;
-import com.vaadin.ui.ComboBox;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.GridLayout;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.Window;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.BeanValidationBinder;
+import com.vaadin.flow.data.binder.ValidationException;
+import org.vaadin.pekka.CheckboxGroup;
 import packt.vaadin.datacentric.chapter07.domain.Role;
 import packt.vaadin.datacentric.chapter07.domain.RoleRepository;
 import packt.vaadin.datacentric.chapter07.domain.User;
@@ -28,49 +27,46 @@ import packt.vaadin.datacentric.chapter07.domain.UserRepository;
 /**
  * @author Alejandro Duarte
  */
-public class CustomCrud extends Composite {
+public class CustomCrud extends Composite<VerticalLayout> {
 
-    private Button refresh = new Button("", VaadinIcons.REFRESH);
-    private Button add = new Button("", VaadinIcons.PLUS);
-    private Button edit = new Button("", VaadinIcons.PENCIL);
+    private Button refresh = new Button("", VaadinIcon.REFRESH.create());
+    private Button add = new Button("", VaadinIcon.PLUS.create());
+    private Button edit = new Button("", VaadinIcon.PENCIL.create());
 
     private Grid<User> grid = new Grid<>(User.class);
 
 
-    private class UserFormWindow extends Window {
+    private class UserFormDialog extends Dialog {
 
         private TextField firstName = new TextField("First name");
         private TextField lastName = new TextField("Last name");
         private TextField email = new TextField("Email");
         private PasswordField password = new PasswordField("Password");
-        private CheckBoxGroup<Role> roles = new CheckBoxGroup<>("Roles", RoleRepository.findAll());
+        private CheckboxGroup<Role> roles = new CheckboxGroup<>();
         private ComboBox<Role> mainRole = new ComboBox<>("Main Role", RoleRepository.findAll());
-        private CheckBox blocked = new CheckBox("Blocked");
+        private Checkbox blocked = new Checkbox("Blocked");
 
         private Button cancel = new Button("Cancel");
-        private Button save = new Button("Save", VaadinIcons.CHECK);
+        private Button save = new Button("Save", VaadinIcon.CHECK.create());
 
-        public UserFormWindow(String caption, User user) {
+        public UserFormDialog(String caption, User user) {
             initLayout(caption);
             initBehavior(user);
         }
 
         private void initLayout(String caption) {
-            setCaption(caption);
-            save.addStyleName(ValoTheme.BUTTON_PRIMARY);
+            roles.setItems(RoleRepository.findAll());
+
+            save.getElement().setAttribute("theme", "primary");
 
             HorizontalLayout buttons = new HorizontalLayout(cancel, save);
             buttons.setSpacing(true);
 
-            GridLayout formLayout = new GridLayout(3, 3, firstName, lastName, email, password, roles, mainRole, blocked);
-            formLayout.setMargin(true);
-            formLayout.setSpacing(true);
+            FormLayout formLayout = new FormLayout(new H2(caption), firstName, lastName, email, password, roles, mainRole, blocked);
 
             VerticalLayout layout = new VerticalLayout(formLayout, buttons);
-            layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
-            setContent(layout);
-            setModal(true);
-            center();
+            layout.setAlignSelf(FlexComponent.Alignment.END, buttons);
+            add(layout);
         }
 
         private void initBehavior(User user) {
@@ -96,25 +92,24 @@ public class CustomCrud extends Composite {
     }
 
 
-    private class RemoveWindow extends Window {
+    private class RemoveDialog extends Dialog {
         private Button cancel = new Button("Cancel");
-        private Button delete = new Button("Delete", VaadinIcons.TRASH);
+        private Button delete = new Button("Delete", VaadinIcon.TRASH.create());
 
-        public RemoveWindow(User user) {
+        public RemoveDialog(User user) {
             initLayout(user);
             initBehavior(user);
         }
 
         private void initLayout(User user) {
-            setCaption("Confirm");
-            Label label = new Label("Do you really want to delete the user " + user.getFirstName() + " " + user.getLastName() + "?");
+            Span span = new Span("Do you really want to delete the user " + user.getFirstName() + " " + user.getLastName() + "?");
 
-            delete.addStyleName(ValoTheme.BUTTON_DANGER);
+            delete.getElement().setAttribute("theme", "error");
             HorizontalLayout buttons = new HorizontalLayout(cancel, delete);
 
-            VerticalLayout layout = new VerticalLayout(label, buttons);
-            layout.setComponentAlignment(buttons, Alignment.BOTTOM_RIGHT);
-            setContent(layout);
+            VerticalLayout layout = new VerticalLayout(new H2("Confirm"), span, buttons);
+            layout.setAlignSelf(FlexComponent.Alignment.END, buttons);
+            add(layout);
         }
 
         private void initBehavior(User user) {
@@ -136,24 +131,24 @@ public class CustomCrud extends Composite {
     }
 
     private void initLayout() {
-        CssLayout header = new CssLayout(refresh, add, edit);
-        header.addStyleName(ValoTheme.LAYOUT_COMPONENT_GROUP);
+        HorizontalLayout header = new HorizontalLayout(refresh, add, edit);
 
         grid.setColumns("firstName", "lastName", "email", "mainRole");
         grid.addComponentColumn(user -> new Button("Delete", e -> deleteClicked(user)));
         grid.setSizeFull();
 
-        VerticalLayout layout = new VerticalLayout(header, grid);
-        layout.setExpandRatio(grid, 1);
-        setCompositionRoot(layout);
-        setSizeFull();
+        getContent().add(header, grid);
+        getContent().expand(grid);
+        getContent().setSizeFull();
+        getContent().setMargin(false);
+        getContent().setPadding(false);
     }
 
     private void initBehavior() {
         grid.asSingleSelect().addValueChangeListener(e -> updateHeader());
         refresh.addClickListener(e -> refresh());
-        add.addClickListener(e -> showAddWindow());
-        edit.addClickListener(e -> showEditWindow());
+        add.addClickListener(e -> showAddDialog());
+        edit.addClickListener(e -> showEditDialog());
     }
 
     public void refresh() {
@@ -162,7 +157,7 @@ public class CustomCrud extends Composite {
     }
 
     private void deleteClicked(User user) {
-        showRemoveWindow(user);
+        showRemoveDialog(user);
         refresh();
     }
 
@@ -171,21 +166,19 @@ public class CustomCrud extends Composite {
         edit.setEnabled(selected);
     }
 
-    private void showAddWindow() {
-        UserFormWindow window = new UserFormWindow("Add", new User());
-        getUI().addWindow(window);
+    private void showAddDialog() {
+        UserFormDialog dialog = new UserFormDialog("Add", new User());
+        dialog.open();
     }
 
-    private void showEditWindow() {
-        UserFormWindow window = new UserFormWindow("Edit", grid.asSingleSelect().getValue());
-        getUI().addWindow(window);
+    private void showEditDialog() {
+        UserFormDialog dialog = new UserFormDialog("Edit", grid.asSingleSelect().getValue());
+        dialog.open();
     }
 
-    private void showRemoveWindow(User user) {
-        Window window = new RemoveWindow(user);
-        window.setModal(true);
-        window.center();
-        getUI().addWindow(window);
+    private void showRemoveDialog(User user) {
+        RemoveDialog dialog = new RemoveDialog(user);
+        dialog.open();
     }
 
 }

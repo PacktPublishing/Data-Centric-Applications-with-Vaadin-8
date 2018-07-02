@@ -1,17 +1,17 @@
 package packt.vaadin.datacentric.chapter01;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends VerticalLayout {
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        setContent(new Label("Welcome to Data-Centric Applications with Vaadin 8!"));
+    public VaadinUI() {
+        add(new Text("Welcome to Data-Centric Applications with Vaadin 10!"));
     }
 
 }

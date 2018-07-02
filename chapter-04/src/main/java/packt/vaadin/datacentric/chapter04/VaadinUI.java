@@ -1,23 +1,24 @@
 package packt.vaadin.datacentric.chapter04;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
     static {
         Messages.addBundle("messages");
     }
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    public VaadinUI() {
         if (AuthService.isAuthenticated()) {
-            setContent(new PrivateComponent());
+            getContent().add(new PrivateComponent());
         } else {
-            setContent(new PublicComponent());
+            getContent().add(new PublicComponent());
         }
     }
 

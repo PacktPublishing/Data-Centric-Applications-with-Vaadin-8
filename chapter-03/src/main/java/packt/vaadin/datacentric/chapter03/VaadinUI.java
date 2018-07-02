@@ -1,20 +1,21 @@
 package packt.vaadin.datacentric.chapter03;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Notification;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
     static {
         Messages.addBundle("messages");
     }
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    public VaadinUI() {
         LoginFormComponent loginForm = new LoginFormComponent();
         loginForm.setCaptions(
                 Messages.get("auth.username"),
@@ -23,7 +24,7 @@ public class VaadinUI extends UI {
                 Messages.get("auth.rememberMe"));
 
         loginForm.setLoginListener(form -> loginClicked(form));
-        setContent(loginForm);
+        getContent().add(loginForm);
     }
 
     private void loginClicked(LoginFormComponent form) {

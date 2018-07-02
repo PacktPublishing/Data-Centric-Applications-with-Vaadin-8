@@ -1,33 +1,28 @@
 package packt.vaadin.datacentric.chapter03;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.LoginForm;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
+import com.vaadin.flow.component.textfield.TextField;
 
 /**
  * @author Alejandro Duarte
  */
-public class LoginFormComponent extends Composite {
+public class LoginFormComponent extends Composite<VerticalLayout> {
 
     public interface LoginListener {
         void logInClicked(LoginFormComponent loginForm);
     }
 
-    private TextField username;
-    private PasswordField password;
-    private CheckBox rememberMe = new CheckBox();
+    private TextField username = new TextField();
+    private PasswordField password = new PasswordField();
+    private Button loginButton = new Button();
+    private Checkbox rememberMe = new Checkbox();
 
     private LoginListener loginListener;
-
-    private String usernameCaption = "Username";
-    private String passwordCaption = "Password";
-    private String loginButtonCaption = "Log in";
-    private String rememberMeCaption = "Remember me";
 
     public LoginFormComponent(LoginListener loginListener) {
         this();
@@ -35,27 +30,8 @@ public class LoginFormComponent extends Composite {
     }
 
     public LoginFormComponent() {
-        LoginForm loginForm = new LoginForm() {
-            @Override
-            protected Component createContent(TextField username, PasswordField password, Button loginButton) {
-                LoginFormComponent.this.username = username;
-                LoginFormComponent.this.password = password;
-
-                username.setCaption(null);
-                password.setCaption(null);
-
-                username.setPlaceholder(usernameCaption);
-                password.setPlaceholder(passwordCaption);
-                loginButton.setCaption(loginButtonCaption);
-                rememberMe.setCaption(rememberMeCaption);
-
-                return new VerticalLayout(username, password, loginButton, rememberMe);
-            }
-        };
-
-        loginForm.addLoginListener(this::logInClicked);
-
-        setCompositionRoot(loginForm);
+        getContent().add(username, password, loginButton, rememberMe);
+        loginButton.addClickListener(this::logInClicked);
     }
 
     public String getUsername() {
@@ -75,19 +51,19 @@ public class LoginFormComponent extends Composite {
     }
 
     public void setUsernameCaption(String usernameCaption) {
-        this.usernameCaption = usernameCaption;
+        username.setPlaceholder(usernameCaption);
     }
 
     public void setPasswordCaption(String passwordCaption) {
-        this.passwordCaption = passwordCaption;
+        password.setPlaceholder(passwordCaption);
     }
 
     public void setLoginButtonCaption(String loginButtonCaption) {
-        this.loginButtonCaption = loginButtonCaption;
+        loginButton.setText(loginButtonCaption);
     }
 
     public void setRememberMeCaption(String rememberMeCaption) {
-        this.rememberMeCaption = rememberMeCaption;
+        rememberMe.setLabel(rememberMeCaption);
     }
 
     public void setCaptions(String usernameCaption, String passwordCaption, String loginButtonCaption, String rememberMeCaption) {
@@ -97,7 +73,7 @@ public class LoginFormComponent extends Composite {
         setRememberMeCaption(rememberMeCaption);
     }
 
-    private void logInClicked(LoginForm.LoginEvent loginEvent) {
+    private void logInClicked(ClickEvent event) {
         if (loginListener != null) {
             loginListener.logInClicked(this);
         }

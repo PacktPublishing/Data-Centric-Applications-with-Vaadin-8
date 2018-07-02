@@ -1,4 +1,4 @@
-package packt.vaadin.datacentric.chapter08.ui;
+    package packt.vaadin.datacentric.chapter08.ui;
 
 import ar.com.fdvs.dj.core.DynamicJasperHelper;
 import ar.com.fdvs.dj.core.layout.ClassicLayoutManager;
@@ -10,10 +10,10 @@ import ar.com.fdvs.dj.domain.builders.FastReportBuilder;
 import ar.com.fdvs.dj.domain.chart.builder.DJBar3DChartBuilder;
 import ar.com.fdvs.dj.domain.entities.columns.AbstractColumn;
 import ar.com.fdvs.dj.domain.entities.columns.PropertyColumn;
-import com.vaadin.server.VaadinSession;
-import com.vaadin.shared.ui.ContentMode;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.Label;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.Html;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.server.VaadinSession;
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.export.HtmlExporter;
@@ -32,7 +32,7 @@ import java.util.List;
 /**
  * @author Alejandro Duarte
  */
-public class MonthlyCapacityReport extends Composite {
+public class MonthlyCapacityReport extends Composite<Div> {
 
     public MonthlyCapacityReport() {
         try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
@@ -73,9 +73,9 @@ public class MonthlyCapacityReport extends Composite {
             exporter.exportReport();
 
             outputStream.flush();
-            Label htmlLabel = new Label("", ContentMode.HTML);
-            htmlLabel.setValue(outputStream.toString("UTF-8"));
-            setCompositionRoot(htmlLabel);
+            Html html = new Html(outputStream.toString("UTF-8"));
+            getContent().add(html);
+            getContent().getStyle().set("background-color", "#f9f9f9");
 
         } catch (JRException | IOException e) {
             throw new RuntimeException(e);

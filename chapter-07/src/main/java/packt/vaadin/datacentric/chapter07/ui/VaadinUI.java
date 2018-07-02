@@ -1,29 +1,26 @@
 package packt.vaadin.datacentric.chapter07.ui;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Component;
-import com.vaadin.ui.TabSheet;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.router.Route;
+import org.vaadin.tabs.PagedTabs;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<PagedTabs> {
 
-    private TabSheet tabSheet = new TabSheet();
+    public VaadinUI() {
+        getContent().setSizeFull();
 
-    @Override
-    protected void init(VaadinRequest request) {
-        tabSheet.setSizeFull();
-        setContent(tabSheet);
-
-        addTab(new EditableGridCrud());
+        // Editable Grids are not available in Vaadin 10.0.1
         addTab(new CustomCrud());
         addTab(new CrudAddOn());
     }
 
     private void addTab(Component content) {
-        tabSheet.addTab(content, content.getClass().getSimpleName());
+        getContent().add(content, content.getClass().getSimpleName());
     }
 
 }

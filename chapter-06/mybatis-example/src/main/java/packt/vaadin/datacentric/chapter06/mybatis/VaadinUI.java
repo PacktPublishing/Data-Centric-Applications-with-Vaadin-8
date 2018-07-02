@@ -1,24 +1,24 @@
 package packt.vaadin.datacentric.chapter06.mybatis;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Grid;
-import com.vaadin.ui.HorizontalLayout;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.Route;
 
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
     private Grid<Message> grid;
     private TextField textField;
     private Button button;
 
-    @Override
-    protected void init(VaadinRequest request) {
+    public VaadinUI() {
         initLayout();
         initBehavior();
     }
@@ -26,7 +26,9 @@ public class VaadinUI extends UI {
     private void initLayout() {
         grid = new Grid<>(Message.class);
         grid.setSizeFull();
-        grid.getColumn("id").setWidth(100);
+        grid.setColumns("id", "content");
+        grid.getColumnByKey("id").setFlexGrow(0);
+        grid.getColumnByKey("content").setFlexGrow(1);
 
         textField = new TextField();
         textField.setPlaceholder("Enter a new message...");
@@ -36,11 +38,11 @@ public class VaadinUI extends UI {
 
         HorizontalLayout formLayout = new HorizontalLayout(textField, button);
         formLayout.setWidth("100%");
-        formLayout.setExpandRatio(textField, 1);
+        formLayout.expand(textField);
 
-        VerticalLayout layout = new VerticalLayout(grid, formLayout);
-        layout.setWidth("600px");
-        setContent(layout);
+        getContent().add(grid, formLayout);
+        getContent().setWidth("600px");
+        getContent().setSizeFull();
     }
 
     private void initBehavior() {
@@ -61,7 +63,6 @@ public class VaadinUI extends UI {
 
         update();
         grid.select(message);
-        grid.scrollToEnd();
     }
 
 }

@@ -1,10 +1,10 @@
 package packt.vaadin.datacentric.chapter03;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.CheckBox;
-import com.vaadin.ui.PasswordField;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.textfield.PasswordField;
 
 import java.io.Serializable;
 
@@ -18,10 +18,10 @@ public class LoginFormLayout extends VerticalLayout {
         void logInClicked(LoginFormLayout loginForm);
     }
 
-    private TextField username = new PasswordField("Username");
+    private PasswordField username = new PasswordField("Username");
     private PasswordField password = new PasswordField("password");
     private Button logIn = new Button("Log in");
-    private CheckBox rememberMe = new CheckBox("Remember me");
+    private Checkbox rememberMe = new Checkbox("Remember me");
 
     private LoginListener loginListener;
 
@@ -32,7 +32,7 @@ public class LoginFormLayout extends VerticalLayout {
 
     public LoginFormLayout() {
         logIn.addClickListener(this::logInClicked);
-        addComponents(username, password, logIn, rememberMe);
+        add(username, password, logIn, rememberMe);
     }
 
     public String getUsername() {
@@ -51,7 +51,7 @@ public class LoginFormLayout extends VerticalLayout {
         this.loginListener = loginListener;
     }
 
-    private void logInClicked(Button.ClickEvent clickEvent) {
+    private void logInClicked(ClickEvent clickEvent) {
         if (loginListener != null) {
             loginListener.logInClicked(this);
         }

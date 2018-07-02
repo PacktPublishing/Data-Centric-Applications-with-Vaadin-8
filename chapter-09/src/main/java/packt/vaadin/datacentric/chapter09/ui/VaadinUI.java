@@ -1,22 +1,26 @@
 package packt.vaadin.datacentric.chapter09.ui;
 
-import com.vaadin.annotations.Title;
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 
 /**
  * @author Alejandro Duarte
  */
-@Title("Call Browser")
-public class VaadinUI extends UI {
+@PageTitle("Call Browser")
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
-        VerticalLayout mainLayout = new VerticalLayout();
-        mainLayout.addComponentsAndExpand(new CallsBrowser());
-        //mainLayout.addComponent(new LazyLoadingVerticalLayout(10));
-        setContent(mainLayout);
+    public VaadinUI() {
+        CallsBrowser callsBrowser = new CallsBrowser();
+        getContent().add(callsBrowser);
+        getContent().expand(callsBrowser);
+        getContent().setSizeFull();
+
+        //LazyLoadingVerticalLayout lazyLoadingVerticalLayout = new LazyLoadingVerticalLayout(10);
+        //getContent().add(lazyLoadingVerticalLayout);
+        //getContent().expand();
     }
 
 }

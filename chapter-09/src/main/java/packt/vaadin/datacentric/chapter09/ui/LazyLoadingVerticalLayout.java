@@ -1,11 +1,9 @@
 package packt.vaadin.datacentric.chapter09.ui;
 
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Composite;
-import com.vaadin.ui.CssLayout;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.VerticalLayout;
-import com.vaadin.ui.themes.ValoTheme;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import packt.vaadin.datacentric.chapter09.domain.Call;
 import packt.vaadin.datacentric.chapter09.domain.CallRepository;
 
@@ -15,9 +13,9 @@ import java.util.List;
 /**
  * @author Alejandro Duarte.
  */
-public class LazyLoadingVerticalLayout extends Composite {
+public class LazyLoadingVerticalLayout extends Composite<VerticalLayout> {
 
-    private CssLayout content = new CssLayout();
+    private VerticalLayout content = new VerticalLayout();
     private Button button = new Button("Load more...");
 
     private int offset;
@@ -26,10 +24,9 @@ public class LazyLoadingVerticalLayout extends Composite {
     public LazyLoadingVerticalLayout(int pageSize) {
         this.pageSize = pageSize;
 
-        button.setStyleName(ValoTheme.BUTTON_BORDERLESS_COLORED);
-
-        VerticalLayout mainLayout = new VerticalLayout(content, button);
-        setCompositionRoot(mainLayout);
+        getContent().add(content, button);
+        getContent().setMargin(false);
+        getContent().setPadding(false);
 
         button.addClickListener(e -> loadMore());
         loadMore();
@@ -43,8 +40,8 @@ public class LazyLoadingVerticalLayout extends Composite {
         }
 
         calls.stream()
-                .map(call -> new Label(call.toString()))
-                .forEach(content::addComponent);
+                .map(call -> new Span(call.toString()))
+                .forEach(content::add);
 
         offset += pageSize;
     }

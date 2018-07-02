@@ -1,7 +1,8 @@
 package packt.vaadin.datacentric.chapter02.webapp;
 
-import com.vaadin.server.VaadinRequest;
-import com.vaadin.ui.UI;
+import com.vaadin.flow.component.Composite;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.Route;
 import packt.vaadin.datacentric.chapter02.api.AppModule;
 import packt.vaadin.datacentric.chapter02.api.ApplicationLayout;
 import packt.vaadin.datacentric.chapter02.api.TabBasedApplicationLayout;
@@ -11,12 +12,13 @@ import java.util.ServiceLoader;
 /**
  * @author Alejandro Duarte
  */
-public class VaadinUI extends UI {
+@Route("")
+public class VaadinUI extends Composite<VerticalLayout> {
 
-    @Override
-    protected void init(VaadinRequest vaadinRequest) {
+    public VaadinUI() {
         TabBasedApplicationLayout layout = new TabBasedApplicationLayout("Caption");
-        setContent(layout);
+        getContent().add(layout);
+        getContent().setSizeFull();
         loadModules(layout);
     }
 
