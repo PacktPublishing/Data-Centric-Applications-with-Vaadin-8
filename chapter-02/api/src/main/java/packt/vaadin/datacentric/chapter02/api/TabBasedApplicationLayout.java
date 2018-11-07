@@ -5,7 +5,6 @@ import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.HasStyle;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -18,7 +17,6 @@ import org.vaadin.tabs.PagedTabs;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -34,6 +32,7 @@ public class TabBasedApplicationLayout extends Composite<VerticalLayout> impleme
     private PagedTabs tabs = new PagedTabs();
 
     private HashMap<String, WorkingAreaComponent> workingAreaComponents = new HashMap<>();
+    private HashMap<Tab, WorkingAreaComponent> tabsToWorkingAreaComponents = new HashMap<>();
     private Collection<String> menuButtonStyles = new HashSet<>();
 
     public TabBasedApplicationLayout(String caption) {
@@ -45,6 +44,10 @@ public class TabBasedApplicationLayout extends Composite<VerticalLayout> impleme
         header.setWidth("100%");
 
         tabs.setSizeFull();
+        tabs.setTabCloseListener(tab -> {
+            workingAreaComponents.remove(tabsToWorkingAreaComponents.get(tab).getCaption());
+            tabsToWorkingAreaComponents.remove(tab);
+        });
 
         splitLayout.addToPrimary(menuLayout);
         splitLayout.addToSecondary(tabs);
@@ -80,8 +83,7 @@ public class TabBasedApplicationLayout extends Composite<VerticalLayout> impleme
             Tab tab = tabs.add(component.getComponent(), component.getCaption(), closable);
             tabs.select(tab);
             workingAreaComponents.put(component.getCaption(), component);
-        } else {
-            showComponent(component.getCaption());
+            tabsToWorkingAreaComponents.put(tab, component);
         }
     }
 
@@ -101,20 +103,6 @@ public class TabBasedApplicationLayout extends Composite<VerticalLayout> impleme
         button.setWidth("100%");
         menuButtonStyles.forEach(button::addClassName);
         menuLayout.add(button);
-    }
-
-    public void closeTab(Component tabContent) {
-        List<WorkingAreaComponent> toRemove = workingAreaComponents.values().stream()
-                .filter(component -> component.getComponent().equals(tabContent))
-                .collect(Collectors.toList());
-
-        workingAreaComponents.remove(toRemove.get(0));
-        tabs.remove(tabs.getTab(tabContent));
-    }
-
-    public void showComponent(String caption) {
-        WorkingAreaComponent workingAreaComponent = workingAreaComponents.get(caption);
-        tabs.select(workingAreaComponent.getComponent());
     }
 
     public void setHeaderStyleName(String styleName) {

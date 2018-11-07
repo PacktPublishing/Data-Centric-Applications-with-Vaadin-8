@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <vaadin.version>10.0.1</vaadin.version>
+        <vaadin.version>10.0.6</vaadin.version>
     </properties>
 
     <modules>
